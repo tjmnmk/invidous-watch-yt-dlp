@@ -21,3 +21,11 @@ pip3 install --break-system-packages --upgrade yt-dlp
 10. **/etc/crontab**: `0 5 * * * www-data find /var/www/html/videos/ -type f -name "*.mp4" -delete`
 11. **/etc/crontab**: `23 * * * * root pip3 install --break-system-packages --upgrade yt-dlp`
 12. **/etc/php/8.3/apache2/php.ini** - `max_execution_time = 300`
+
+**If YouTube blocks you, you will need to pass the token and cookies to yt-dlp; you can do this by editing the following line:**
+```php
+$command = "yt-dlp --format 'bestvideo[height<=480]+bestaudio/best[height<=480]' --merge-output-format mp4 -o $video_file_escped $video_url_escaped";
+```
+
+https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide#po-token-for-gvs
+https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies
