@@ -1,3 +1,5 @@
+It requires a fast internet connection on the server side, as the video is first downloaded there and then streamed.
+
 ```bash
 sudo apt update
 sudo apt install apache2 php libapache2-mod-php8.3
