@@ -16,4 +16,6 @@ pip3 install --break-system-packages --upgrade yt-dlp
 7. `chown www-data /var/www/.cache`
 8. `systemctl restart nginx`
 9. `systemctl restart apache2`
-10. **/etc/crontab**: `0 5 * * * root find /var/www/html/videos/ -type f -name "*.mp4" -delete`
+10. **/etc/crontab**: `0 5 * * * www-data find /var/www/html/videos/ -type f -name "*.mp4" -delete`
+11. **/etc/crontab**: `23 * * * * root pip3 install --break-system-packages --upgrade yt-dlp`
+12. **/etc/php/8.3/apache2/php.ini** - `max_execution_time = 300`
