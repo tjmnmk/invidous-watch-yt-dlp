@@ -33,11 +33,21 @@ $video_url_escaped = escapeshellarg($video_url);
 if (!file_exists($video_file)) {
     // download video using youtube-dl
     // quality 480p
-    $command = "yt-dlp --cookies " . COOKIES_FILE . " --extractor-args 'youtube:po_token=" . PO_TOKEN . "' -S '+height:480' -f 'bv*' --merge-output-format mp4 -o $video_file_escped $video_url_escaped";
+    $command = "yt-dlp ";
+    if (COOKIES_FILE) {
+        $escaped_cookies_file = escapeshellarg(COOKIES_FILE);
+        $command .= " --cookies " . $escaped_cookies_file . " ";
+    }
+    if (PO_TOKEN) {
+        $full_po_arg = "youtube:po_token=" . PO_TOKEN;
+        $po_arg = escapeshellarg($full_po_arg);
+        $command .= " --extractor-args " . $po_arg . " ";
+    }
+    $command .= " -S '+height:480' -f 'bv*' --merge-output-format mp4 -o $video_file_escped $video_url_escaped ";
     exec($command, $output, $return_var);
-
     // save error to syslog
     if ($return_var !== 0) {
+        error_log($command);
         error_log("Error downloading video: " . implode("\n", $output));
         die('Error downloading video');
     }
