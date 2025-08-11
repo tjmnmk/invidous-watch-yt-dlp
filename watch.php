@@ -43,7 +43,7 @@ if (!file_exists($video_file)) {
         $po_arg = escapeshellarg($full_po_arg);
         $command .= " --extractor-args " . $po_arg . " ";
     }
-    $command .= " -S '+height:480' -f 'bv*' --merge-output-format mp4 -o $video_file_escped $video_url_escaped ";
+    $command .= " -S '+height:480' -f 'bv*+ba/best' --merge-output-format mp4 -o $video_file_escped $video_url_escaped ";
     exec($command, $output, $return_var);
     // save error to syslog
     if ($return_var !== 0) {
