@@ -11,5 +11,7 @@ define("LOW_QUALITY_TIME_START", "00:00:00");
 // low quality time end e.g. 00:00:00
 define("LOW_QUALITY_TIME_END", "06:00:00");
 
+define("LOW_QUALITY_ENABLED", true);
+
 // low quality time zone e.g. UTC
 define("LOW_QUALITY_TIME_ZONE", "Asia/Yekaterinburg"); // https://www.php.net/manual/en/timezones.asia.php

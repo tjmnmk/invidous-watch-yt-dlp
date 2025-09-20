@@ -7,6 +7,10 @@ require_once 'config.php';
  * @return bool true if current time is within low quality period
  */
 function isLowQualityTime() {
+    if (!LOW_QUALITY_ENABLED) {
+        return false;
+    }
+    
     // Get timezone from config
     $timezone = new DateTimeZone(LOW_QUALITY_TIME_ZONE);
     
