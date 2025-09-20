@@ -2,6 +2,32 @@
 
 require_once 'config.php';
 
+/**
+ * Check if current time is within low quality time period
+ * @return bool true if current time is within low quality period
+ */
+function isLowQualityTime() {
+    // Get timezone from config
+    $timezone = new DateTimeZone(LOW_QUALITY_TIME_ZONE);
+    
+    // Get current time in the configured timezone
+    $now = new DateTime('now', $timezone);
+    $currentTime = $now->format('H:i:s');
+    
+    // Get start and end times from config
+    $startTime = LOW_QUALITY_TIME_START;
+    $endTime = LOW_QUALITY_TIME_END;
+    
+    // Handle case where end time is before start time (spans midnight)
+    if ($endTime < $startTime) {
+        // Time period spans midnight (e.g., 22:00:00 to 06:00:00)
+        return ($currentTime >= $startTime || $currentTime <= $endTime);
+    } else {
+        // Normal time period within same day
+        return ($currentTime >= $startTime && $currentTime <= $endTime);
+    }
+}
+
 // get video code from ?v
 if (isset($_GET['v'])) {
     $video_code = $_GET['v'];
@@ -19,6 +45,10 @@ $video_url = 'https://www.youtube.com/watch?v=' . $video_code;
 
 // download video to video dir
 $video_dir = 'videos/';
+if (isLowQualityTime()) {
+    $video_dir = 'videos_low/';
+}
+
 if (!is_dir($video_dir)) {
     mkdir($video_dir, 0755, true);
 }
@@ -43,7 +73,11 @@ if (!file_exists($video_file)) {
         $po_arg = escapeshellarg($full_po_arg);
         $command .= " --extractor-args " . $po_arg . " ";
     }
-    $command .= " -S '+height:480' -f 'bv*+ba/best' --merge-output-format mp4 -o $video_file_escped $video_url_escaped ";
+    if (isLowQualityTime()) {
+        $command .= " -f 'worstvideo*+worstaudio/worst' --merge-output-format mp4 -o $video_file_escped $video_url_escaped ";
+    } else {
+        $command .= " -S '+height:480' -f 'bv*+ba/best' --merge-output-format mp4 -o $video_file_escped $video_url_escaped ";
+    }
     exec($command, $output, $return_var);
     // save error to syslog
     if ($return_var !== 0) {
