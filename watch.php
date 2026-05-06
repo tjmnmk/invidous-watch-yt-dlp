@@ -32,6 +32,21 @@ function isLowQualityTime() {
     }
 }
 
+function yt_dlp_base_command() {
+    $command = "yt-dlp --js-runtimes deno:" . DENO_PATH . " ";
+    if (COOKIES_FILE) {
+        $escaped_cookies_file = escapeshellarg(COOKIES_FILE);
+        $command .= " --cookies " . $escaped_cookies_file . " ";
+    }
+    if (PO_TOKEN) {
+        $full_po_arg = "youtube:po_token=" . PO_TOKEN;
+        $po_arg = escapeshellarg($full_po_arg);
+        $command .= " --extractor-args " . $po_arg . " ";
+    }
+
+    return $command;
+}
+
 // get video code from ?v
 if (isset($_GET['v'])) {
     $video_code = $_GET['v'];
@@ -67,18 +82,9 @@ $video_url_escaped = escapeshellarg($video_url);
 if (!file_exists($video_file)) {
     // download video using youtube-dl
     // quality 480p
-    $command = "yt-dlp --js-runtimes deno:" . DENO_PATH . " ";
-    if (COOKIES_FILE) {
-        $escaped_cookies_file = escapeshellarg(COOKIES_FILE);
-        $command .= " --cookies " . $escaped_cookies_file . " ";
-    }
-    if (PO_TOKEN) {
-        $full_po_arg = "youtube:po_token=" . PO_TOKEN;
-        $po_arg = escapeshellarg($full_po_arg);
-        $command .= " --extractor-args " . $po_arg . " ";
-    }
+    $command = yt_dlp_base_command();
     if (!$DOWNLOAD_LIVESTREAMS) {
-        $command .= ' --match-filter "is_live != true" ';
+        $command .= ' --match-filter "live_status!=is_live & live_status!=is_upcoming" ';
     }
     // download only first video in playlist if url is a playlist
     $command .= " --playlist-items 1 ";
@@ -92,8 +98,25 @@ if (!file_exists($video_file)) {
     if ($return_var !== 0) {
         error_log($command);
         error_log("Error downloading video: " . implode("\n", $output));
+        header('Content-Type: text/plain');
         die('Error downloading video');
     }
+}
+
+if (!file_exists($video_file)) {
+    header('Content-Type: text/plain');
+
+    // check if video is a livestream
+    $command = yt_dlp_base_command();
+    $command .= "--print \"%(live_status)s\" " . $video_url_escaped;
+    exec($command, $output, $return_var);
+    // live status is last line of output
+    $live_status = end($output);
+    echo "live_status: " . $live_status . "\n";
+    if ($return_var === 0 && isset($live_status) && $live_status === 'is_live' && !$DOWNLOAD_LIVESTREAMS) {
+        die('Video is a livestream, downloading livestreams is not allowed');
+    }
+    die('Video file does not exist after download attempt');
 }
 
 // redirect to video file by 302
