@@ -15,3 +15,7 @@ define("LOW_QUALITY_ENABLED", true);
 
 // low quality time zone e.g. UTC
 define("LOW_QUALITY_TIME_ZONE", "Asia/Yekaterinburg"); // https://www.php.net/manual/en/timezones.asia.php
+
+define("DENO_PATH", "/usr/local/bin/deno"); // e.g. /usr/bin/deno
+
+define("DOWNLOAD_LIVESTREAMS", false); // set to true to allow downloading livestreams, may cause issues with some channels

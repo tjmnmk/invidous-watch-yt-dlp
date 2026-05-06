@@ -67,7 +67,7 @@ $video_url_escaped = escapeshellarg($video_url);
 if (!file_exists($video_file)) {
     // download video using youtube-dl
     // quality 480p
-    $command = "yt-dlp ";
+    $command = "yt-dlp --js-runtimes deno:" . DENO_PATH . " ";
     if (COOKIES_FILE) {
         $escaped_cookies_file = escapeshellarg(COOKIES_FILE);
         $command .= " --cookies " . $escaped_cookies_file . " ";
@@ -77,6 +77,11 @@ if (!file_exists($video_file)) {
         $po_arg = escapeshellarg($full_po_arg);
         $command .= " --extractor-args " . $po_arg . " ";
     }
+    if (!$DOWNLOAD_LIVESTREAMS) {
+        $command .= ' --match-filter "is_live != true" ';
+    }
+    // download only first video in playlist if url is a playlist
+    $command .= " --playlist-items 1 ";
     if (isLowQualityTime()) {
         $command .= " -f 'worstvideo*+worstaudio/worst' --merge-output-format mp4 -o $video_file_escped $video_url_escaped ";
     } else {
